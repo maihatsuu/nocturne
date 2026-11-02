@@ -30,11 +30,15 @@ public class NocturneConfig {
 	public int heightOffsetMax = 20;
 	/** How far above the city's top a player still counts as "at" the city. */
 	public int verticalRange = 48;
-	/** Maximum phantoms in the air above a single city. */
-	public int maxPhantomsPerCity = 6;
+	/** How far outside the city's footprint (horizontally) a player still counts as "at" the city. */
+	public int cityDetectionMargin = 32;
+	/** Maximum phantoms within 64 blocks of a player before more spawn for them. */
+	public int maxPhantomsPerPlayer = 4;
 	/** Group size is 1 + random(0..difficulty) like vanilla; otherwise groupSize. */
 	public boolean scaleWithDifficulty = true;
 	public int groupSize = 2;
+	/** Log every spawn attempt and why it failed (for testing). */
+	public boolean debugLogging = false;
 
 	public static NocturneConfig get() {
 		return instance;
@@ -73,7 +77,8 @@ public class NocturneConfig {
 		heightOffsetMin = Math.max(0, heightOffsetMin);
 		heightOffsetMax = Math.max(heightOffsetMin, heightOffsetMax);
 		verticalRange = Math.max(0, verticalRange);
-		maxPhantomsPerCity = Math.max(0, maxPhantomsPerCity);
+		cityDetectionMargin = Math.max(0, cityDetectionMargin);
+		maxPhantomsPerPlayer = Math.max(0, maxPhantomsPerPlayer);
 		groupSize = Math.max(1, groupSize);
 	}
 }

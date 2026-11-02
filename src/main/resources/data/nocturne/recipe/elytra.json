@@ -2,16 +2,16 @@
 	"type": "minecraft:crafting_shaped",
 	"category": "equipment",
 	"pattern": [
-		"MMM",
-		"MCM",
+		"MSM",
+		"M M",
 		"M M"
 	],
 	"key": {
 		"M": {
 			"item": "minecraft:phantom_membrane"
 		},
-		"C": {
-			"item": "minecraft:popped_chorus_fruit"
+		"S": {
+			"item": "minecraft:string"
 		}
 	},
 	"result": {
