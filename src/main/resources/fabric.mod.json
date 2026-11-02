@@ -3,13 +3,13 @@
 	"id": "nocturne",
 	"version": "${version}",
 	"name": "Nocturne",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"description": "Phantoms leave the Overworld and haunt the skies above End cities. Phantom membranes can be crafted into elytra.",
 	"authors": [
-		"Me!"
+		"maihatsuu"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"homepage": "https://github.com/maihatsuu/nocturne",
+		"sources": "https://github.com/maihatsuu/nocturne"
 	},
 	"license": "CC0-1.0",
 	"icon": "assets/nocturne/icon.png",
@@ -17,17 +17,10 @@
 	"entrypoints": {
 		"main": [
 			"maihatsuu.nocturne.Nocturne"
-		],
-		"client": [
-			"maihatsuu.nocturne.client.NocturneClient"
 		]
 	},
 	"mixins": [
-		"nocturne.mixins.json",
-		{
-			"config": "nocturne.client.mixins.json",
-			"environment": "client"
-		}
+		"nocturne.mixins.json"
 	],
 	"depends": {
 		"fabricloader": ">=0.20.1",

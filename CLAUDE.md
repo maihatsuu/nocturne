@@ -6,15 +6,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Nocturne is a Fabric mod for Minecraft **1.21.1** (Java 21, Fabric Loader 0.20.1, Fabric API 0.116.17+1.21.1). Mod id `nocturne`, base package `maihatsuu.nocturne`.
 
-The design spec is `../phantom-elytra-mod-plan.md`, one directory up from this repo. Read it before implementing features. In short:
-- Stop Overworld phantom spawns by cancelling `PhantomSpawner.tick` with a mixin. Leave the `doInsomnia` gamerule and the insomnia stat alone.
-- Spawn phantoms above End cities only, using a custom spawner on `ServerTickEvents.END_WORLD_TICK` filtered to `Level.END`, with a population cap. No insomnia check.
-- Let phantom membranes be used to make elytra. The method (crafting, smithing, or something else) is still undecided, so ask before picking one.
-- Add a JSON config with toggles and tuning values.
-- The plan has open questions marked "Pick one". Don't settle those on your own; ask the user.
-- The target is **server-side only**, unless the elytra method needs client UI.
+The design spec is `../phantom-elytra-mod-plan.md`, one directory up from this repo. Its open questions have been settled:
+- **Elytra:** a shaped crafting recipe: 7 phantom membranes around a popped chorus fruit.
+- **End-city phantoms:** vanilla despawning; cities spawn forever, up to a per-city cap; group size scales with difficulty like vanilla.
+- **No client code.** The mod is server-side only: vanilla clients can join, because the recipe syncs from the server. It still installs on the client for singleplayer, so `"environment": "*"` stays.
 
-The repo is still the unmodified Fabric example-mod template. `ExampleMixin`, `ExampleClientMixin`, the placeholder text in `fabric.mod.json` (description, authors, contact) and the "Hello Fabric world" log line are all template leftovers to replace.
+How the pieces fit:
+- `mixin/PhantomSpawnerMixin`: cancels `PhantomSpawner.tick` at HEAD, which turns off Overworld insomnia phantoms. The `doInsomnia` gamerule and the `TIME_SINCE_REST` stat are deliberately left alone.
+- `spawn/EndCityPhantomSpawner`: ticked from `ServerTickEvents.END_WORLD_TICK` (registered in `Nocturne.onInitialize`), and only acts in `Level.END`.
+  - It finds the city around a player with `StructureManager.startsForStructure(ChunkPos, ...)` plus a check against the city's bounding-box footprint. `getStructureWithPieceAt` would miss players flying above the pieces.
+  - It spawns the group above the box's max Y, using the same create / `finalizeSpawn(NATURAL)` / `addFreshEntityWithPassengers` sequence as vanilla.
+- `config/NocturneConfig`: a Gson POJO at `config/nocturne.json`, loaded in `onInitialize` and read via `NocturneConfig.get()`. On load, missing fields fall back to defaults and the file is rewritten.
+- Data: `data/nocturne/recipe/elytra.json`, plus a recipe-book unlock advancement under `data/nocturne/advancement/recipes/`.
 
 ## Commands
 
@@ -29,10 +32,9 @@ No test suite is configured. CI (`.github/workflows/build.yml`) only runs `./gra
 
 ## Build and layout notes
 
-- **Mappings are official Mojang mappings** (`loom.officialMojangMappings()`), not Yarn. Use Mojang names such as `ServerLevel`, `ResourceLocation` and `PhantomSpawner`. The plan says the vanilla names it mentions still need checking against 1.21.1. Check them in the `genSources` output.
-- `splitEnvironmentSourceSets()` is on. Common/server code lives in `src/main/`. Client-only code lives in `src/client/`, which can see `main` but not the other way round. Keep anything client-only (rendering, screens, `net.minecraft.client.*`) out of `src/main`.
-- Mixins are registered in two configs. Server/common mixins go in `src/main/resources/nocturne.mixins.json` (package `maihatsuu.nocturne.mixin`). Client mixins go in `src/client/resources/nocturne.client.mixins.json` (package `maihatsuu.nocturne.client.mixin`). Each new mixin class has to be added to the right config's list. `injectors.defaultRequire: 1` means an injection that fails to match crashes the game at load time.
-- `fabric.mod.json` currently says `"environment": "*"` and declares a client entrypoint. If the mod stays server-only, update both.
-- Data-driven content (for example an elytra recipe) goes under `src/main/resources/data/nocturne/` (1.21 uses the singular folder names, e.g. `recipe/`).
+- **Mappings are official Mojang mappings** (`loom.officialMojangMappings()`), not Yarn. Use Mojang names such as `ServerLevel`, `ResourceLocation` and `PhantomSpawner`. Check vanilla names and signatures in the `genSources` output.
+- There is a single `main` source set (the template's client source set was removed). Don't reference `net.minecraft.client.*`.
+- Mixins are listed in `src/main/resources/nocturne.mixins.json` (package `maihatsuu.nocturne.mixin`). `injectors.defaultRequire: 1` means an injection that fails to match crashes the game at load time.
+- 1.21.1 still uses `MobSpawnType` (it was renamed `EntitySpawnReason` in later versions). Data folders use the singular names (`recipe/`, `advancement/`), and recipe results use `"id"`.
 - Use `Nocturne.id(path)` to build `nocturne:`-namespaced `ResourceLocation`s, and `Nocturne.LOGGER` for logging.
 - Versions live in `gradle.properties`.

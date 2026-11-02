@@ -1,6 +1,9 @@
 package maihatsuu.nocturne;
 
+import maihatsuu.nocturne.config.NocturneConfig;
+import maihatsuu.nocturne.spawn.EndCityPhantomSpawner;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 
 import net.minecraft.resources.ResourceLocation;
 
@@ -10,18 +13,12 @@ import org.slf4j.LoggerFactory;
 public class Nocturne implements ModInitializer {
 	public static final String MOD_ID = "nocturne";
 
-	// This logger is used to write text to the console and the log file.
-	// It is considered best practice to use your mod id as the logger's name.
-	// That way, it's clear which mod wrote info, warnings, and errors.
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
 	@Override
 	public void onInitialize() {
-		// This code runs as soon as Minecraft is in a mod-load-ready state.
-		// However, some things (like resources) may still be uninitialized.
-		// Proceed with mild caution.
-
-		LOGGER.info("Hello Fabric world!");
+		NocturneConfig.load();
+		ServerTickEvents.END_WORLD_TICK.register(EndCityPhantomSpawner::tick);
 	}
 
 	public static ResourceLocation id(String path) {
